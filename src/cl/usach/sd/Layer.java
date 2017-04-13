@@ -16,7 +16,7 @@ public class Layer implements Cloneable, EDProtocol {
 	private static String prefix = null;
 	private int transportId;
 	private int layerId;
-	private ExampleNode tempNodo;
+	
 	
 
 	/**
@@ -37,13 +37,46 @@ public class Layer implements Cloneable, EDProtocol {
 			randNode = CommonState.r.nextInt(Network.size());
 		}
 		System.out.println("Nodo a recibir el mensaje:"+randNode);
+		//guardo en la variable cache para despues verificar que no pasemos por el mismo
+		LRUMap<Integer, Integer> cache=((ExampleNode) myNode).getCache();
+		//cache.put((int) this.tempNodo.getID(), CommonState.r.nextInt((int)((Linkable) this.tempNodo.getProtocol(0)).degree()));
+		/**
+		 * maxJump Cantidad de saltos maximos para encontrar un nodo.
+		 */
+		int maxJump=4;
 		/**
 		 * sendNode ID del Nodo que se debe enviar
 		 */
 		//Node sendNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(randDegree);
 		Node sendNode = searchNode(randNode);
+		/**
+		 * Buscando al nodo si no esta en cache
+		 */
+		//Verifico si el origen es distinto al destino.
 		if(myNode.getID()!=sendNode.getID())
 		{
+			ExampleNode tempNode = (ExampleNode) myNode;
+			//cache.put(sendNode.getID(), 5);
+			//Mientras que no encuentre al nodo o queden saltos (espacio) en la variable cache
+			while((tempNode.getID()!=sendNode.getID()) || (cache.size()<maxJump))
+			{
+				
+				for (int i = 0; i < ((Linkable) myNode.getProtocol(0)).degree(); i++) 
+				{
+					//Reviso si algun vecino tiene la ID que estoy buscando.
+					if(myNode.getID()==((Linkable) myNode.getProtocol(0)).getNeighbor(i).getID())
+					{
+						//de tenerla actualiza el cache, envia el mensaje y termina el ciclo for.
+						/*
+						 * Actualizar los cache de los nodos
+						 */
+						sendmessage(myNode,((Linkable) tempNode.getProtocol(0)).getNeighbor(i), layerId, message);
+						break;
+					}
+				}
+				
+			}
+			
 			int idNodo = message.getType();
 			if(idNodo == myNode.getID())
 			{
@@ -53,10 +86,11 @@ public class Layer implements Cloneable, EDProtocol {
 			{
 				
 			}
-			//guardo en la variable cache para despues verificar que no pasemos por el mismo
-			LRUMap<Integer, Integer> cache=((ExampleNode) myNode).getCache();
-			//cache.put((int) this.tempNodo.getID(), CommonState.r.nextInt((int)((Linkable) this.tempNodo.getProtocol(0)).degree()));
 			
+			sendmessage(myNode,sendNode, layerId, message);
+		}
+		else
+		{
 			sendmessage(myNode,sendNode, layerId, message);
 		}
 		getStats();
