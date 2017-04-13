@@ -1,5 +1,7 @@
 package cl.usach.sd;
 
+import java.util.Iterator;
+
 import org.apache.commons.collections4.map.LRUMap;
 
 import peersim.config.Configuration;
@@ -9,6 +11,7 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
+import sun.misc.Cache;
 import peersim.core.Linkable;
 
 public class Layer implements Cloneable, EDProtocol {
@@ -70,6 +73,12 @@ public class Layer implements Cloneable, EDProtocol {
 						/*
 						 * Actualizar los cache de los nodos
 						 */
+						Iterator<Integer> it = cache.keySet().iterator();
+						while(it.hasNext())
+						{
+							Integer key = it.next();
+							putCache;
+						}
 						sendmessage(myNode,((Linkable) tempNode.getProtocol(0)).getNeighbor(i), layerId, message);
 						break;
 					}
