@@ -6,6 +6,10 @@ import peersim.core.GeneralNode;
 
 public class ExampleNode extends GeneralNode {
 	private int count;
+	/*
+	 * Primer int es el nodo buscado
+	 * el segundo es en cual vecino encontro la solucion.
+	 */
 	private LRUMap<Integer, Integer> cache;
 	private int cacheSize;
 	//para prueba

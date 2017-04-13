@@ -16,6 +16,7 @@ public class Layer implements Cloneable, EDProtocol {
 	private static String prefix = null;
 	private int transportId;
 	private int layerId;
+	private ExampleNode tempNodo;
 	
 
 	/**
@@ -38,6 +39,9 @@ public class Layer implements Cloneable, EDProtocol {
 			
 		}
 		LRUMap<Integer, Integer> cache=((ExampleNode) myNode).getCache();
+		//guardo en la variable cache para despues verificar que no pasemos por el mismo
+		
+		cache.put((int) this.tempNodo.getID(), CommonState.r.nextInt((int)((Linkable) this.tempNodo.getProtocol(0)).degree()));
 		
 		getStats();
 	}
@@ -71,9 +75,21 @@ public class Layer implements Cloneable, EDProtocol {
 			System.out.println("	NeighborNode: " + ((Linkable) currentNode.getProtocol(0)).getNeighbor(i).getIndex());
 		}
 		
+		
+		/*
+		 * Guardo el nodo actual para leerlo en sendMessage.
+		 * uso int aun que deberia ser long.
+		 */
+		this.tempNodo = (ExampleNode) currentNode;
 		/**
 		 * Envió del dato a través de la capa de transporte, la cual enviará
 		 * según el ID del emisor y el receptor
+		 * 
+		    Parameters:
+		        src - sender node
+		        dest - destination node
+		        msg - message to be sent
+		        pid - protocol identifier
 		 */
 		((Transport) currentNode.getProtocol(transportId)).send(currentNode, sendNode, message, layerId);
 		// Otra forma de hacerlo
