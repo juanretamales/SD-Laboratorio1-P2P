@@ -1,5 +1,7 @@
 package cl.usach.sd;
 
+import org.apache.commons.collections4.map.LRUMap;
+
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
 import peersim.core.CommonState;
@@ -7,12 +9,14 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
 import peersim.transport.Transport;
+import peersim.core.Linkable;
 
 public class Layer implements Cloneable, EDProtocol {
 	private static final String PAR_TRANSPORT = "transport";
 	private static String prefix = null;
 	private int transportId;
 	private int layerId;
+	
 
 	/**
 	 * MÃ©todo en el cual se va a procesar el mensaje que ha llegado al Nodo
@@ -24,6 +28,17 @@ public class Layer implements Cloneable, EDProtocol {
 		Message message = (Message) event;
 		sendmessage(myNode, layerId, message);
 
+		int idNodo = message.getType();
+		if(idNodo == myNode.getID())
+		{
+			System.out.println("Eureka!!");
+		}
+		else
+		{
+			
+		}
+		LRUMap<Integer, Integer> cache=((ExampleNode) myNode).getCache();
+		
 		getStats();
 	}
 
@@ -33,15 +48,34 @@ public class Layer implements Cloneable, EDProtocol {
 
 	public void sendmessage(Node currentNode, int layerId, Object message) {
 		/**
+		 * Random degree
+		 */
+		int randDegree = CommonState.r.nextInt(((Linkable) currentNode.getProtocol(0)).degree());
+		
+		/**
 		 * sendNode ID del Nodo que se debe enviar
 		 */
-		int sendNode = CommonState.r.nextInt(Network.size());
+		
+		Node sendNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(randDegree);
+		
+		System.out.println("Nodo que se debe enviar:");
+		System.out.println(sendNode.getIndex());
+		System.out.println("Nodo actual:");
+		System.out.println(currentNode.getIndex());
+		System.out.println("Mensaje");
+		System.out.println(message);
 
+		System.out.println("CurrentNode: " + currentNode.getID() + " | Degree: " + ((Linkable) currentNode.getProtocol(0)).degree());
+		
+		for (int i = 0; i < ((Linkable) currentNode.getProtocol(0)).degree(); i++) {
+			System.out.println("	NeighborNode: " + ((Linkable) currentNode.getProtocol(0)).getNeighbor(i).getIndex());
+		}
+		
 		/**
-		 * EnviÃ³ del dato a travÃ©s de la capa de transporte, la cual enviarÃ¡
-		 * segÃºn el ID del emisor y el receptor
+		 * Envió del dato a través de la capa de transporte, la cual enviará
+		 * según el ID del emisor y el receptor
 		 */
-		((Transport) currentNode.getProtocol(transportId)).send(currentNode, searchNode(sendNode), message, layerId);
+		((Transport) currentNode.getProtocol(transportId)).send(currentNode, sendNode, message, layerId);
 		// Otra forma de hacerlo
 		// ((Transport)
 		// currentNode.getProtocol(FastConfig.getTransport(layerId))).send(currentNode,

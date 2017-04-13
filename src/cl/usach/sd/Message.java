@@ -4,17 +4,30 @@ package cl.usach.sd;
  * Clase la cual vamos a utilizar para enviar datos de un Peer a otro
  */
 public class Message {
-	private String text;
+	private Integer text;
+	private Integer type;
 
-	public Message(String text) {
+	public Message(Integer text) {
 		this.setText(text);
 	}
+	public Message(Integer text, Integer type) {
+		this.setText(text);
+		this.setType(type);
+	}
 
-	public String getText() {
+	public Integer getText() {
 		return text;
 	}
 
-	public void setText(String text) {
+	public void setText(Integer text) {
 		this.text = text;
+	}
+
+	public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
 	}
 }
