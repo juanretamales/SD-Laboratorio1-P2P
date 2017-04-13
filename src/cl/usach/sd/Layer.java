@@ -27,22 +27,38 @@ public class Layer implements Cloneable, EDProtocol {
 	@Override
 	public void processEvent(Node myNode, int layerId, Object event) {
 		Message message = (Message) event;
-		sendmessage(myNode, layerId, message);
-
-		int idNodo = message.getType();
-		if(idNodo == myNode.getID())
+		
+		/**
+		 * Random degree - busca un numero aleatorio entre la cantidad de nodos en la red.
+		 */
+		int randNode = CommonState.r.nextInt(Network.size());
+		while(randNode==((int)myNode.getID()))
 		{
-			System.out.println("Eureka!!");
+			randNode = CommonState.r.nextInt(Network.size());
 		}
-		else
+		System.out.println("Nodo a recibir el mensaje:"+randNode);
+		/**
+		 * sendNode ID del Nodo que se debe enviar
+		 */
+		//Node sendNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(randDegree);
+		Node sendNode = searchNode(randNode);
+		if(myNode.getID()!=sendNode.getID())
 		{
+			int idNodo = message.getType();
+			if(idNodo == myNode.getID())
+			{
+				System.out.println("Eureka!!");
+			}
+			else
+			{
+				
+			}
+			//guardo en la variable cache para despues verificar que no pasemos por el mismo
+			LRUMap<Integer, Integer> cache=((ExampleNode) myNode).getCache();
+			//cache.put((int) this.tempNodo.getID(), CommonState.r.nextInt((int)((Linkable) this.tempNodo.getProtocol(0)).degree()));
 			
+			sendmessage(myNode,sendNode, layerId, message);
 		}
-		LRUMap<Integer, Integer> cache=((ExampleNode) myNode).getCache();
-		//guardo en la variable cache para despues verificar que no pasemos por el mismo
-		
-		cache.put((int) this.tempNodo.getID(), CommonState.r.nextInt((int)((Linkable) this.tempNodo.getProtocol(0)).degree()));
-		
 		getStats();
 	}
 
@@ -50,37 +66,14 @@ public class Layer implements Cloneable, EDProtocol {
 		Observer.message.add(1);		
 	}
 
-	public void sendmessage(Node currentNode, int layerId, Object message) {
-		/**
-		 * Random degree
-		 */
-		int randDegree = CommonState.r.nextInt(((Linkable) currentNode.getProtocol(0)).degree());
+	public void sendmessage(Node currentNode,Node sendNode, int layerId, Object message) {
 		
-		/**
-		 * sendNode ID del Nodo que se debe enviar
-		 */
-		
-		Node sendNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(randDegree);
-		
-		System.out.println("Nodo que se debe enviar:");
-		System.out.println(sendNode.getIndex());
-		System.out.println("Nodo actual:");
-		System.out.println(currentNode.getIndex());
-		System.out.println("Mensaje");
-		System.out.println(message);
-
+		/*
 		System.out.println("CurrentNode: " + currentNode.getID() + " | Degree: " + ((Linkable) currentNode.getProtocol(0)).degree());
 		
 		for (int i = 0; i < ((Linkable) currentNode.getProtocol(0)).degree(); i++) {
 			System.out.println("	NeighborNode: " + ((Linkable) currentNode.getProtocol(0)).getNeighbor(i).getIndex());
-		}
-		
-		
-		/*
-		 * Guardo el nodo actual para leerlo en sendMessage.
-		 * uso int aun que deberia ser long.
-		 */
-		this.tempNodo = (ExampleNode) currentNode;
+		}*/
 		/**
 		 * Envió del dato a través de la capa de transporte, la cual enviará
 		 * según el ID del emisor y el receptor
