@@ -54,32 +54,34 @@ public class Layer implements Cloneable, EDProtocol {
 		 * sendNode ID del Nodo que se debe enviar
 		 */
 		//Node sendNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(randDegree);
-		Node sendNode = searchNode(randNode);
+		//Node sendNode = searchNode(randNode);
+		// ((double) randNode)
 		/**
 		 * Buscando al nodo si no esta en cache
 		 */
 		//Verifico si el origen es distinto al destino.
-		if(myNode.getID()!=sendNode.getID())
+		if(myNode.getID()!=((double) randNode))
 		{
 			ExampleNode tempNode = (ExampleNode) myNode;
 			//Verifico si tengo la busqueda en el cache
-			if(tempNode.getCache().containsKey(sendNode.getID()))
+			if(tempNode.getCache().containsKey(((double) randNode)))
 			{
 				//lo encontro en cache
 				
 				LRUMap<Integer, Integer> cache=new LRUMap<Integer, Integer>(((ExampleNode) myNode).getCacheSize());
-				while((tempNode.getID()!=sendNode.getID()))
+				while((tempNode.getID()!=((double) randNode)))
 				{
 					cache = tempNode.getCache();
 					//verificando si se encuentra dentro del cache
-					if(cache.get(((int) sendNode.getID()))!=null)
+					if(cache.get(randNode)!=null)
 					{
 						//buscando la ID del vecino a quien preguntar
-						//int i=;
-						tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(cache.get(((int) sendNode.getID())));
+						//int i=cache.get(((int) sendNode.getID()));
+						//asignando a tempNote el vecino encontrado
+						tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(cache.get(randNode));
 					}
-					
-					
+					//si tempNode no es el nodo que estamos buscando sigue buscando en cache.
+					//falta buscar si ya no lo tiene en cache.
 				}
 			}
 			else
@@ -88,7 +90,7 @@ public class Layer implements Cloneable, EDProtocol {
 				//cache.put(sendNode.getID(), 5);
 				//Mientras que no encuentre al nodo o queden saltos (espacio) en la variable cache
 				//int found = 0;
-				while((tempNode.getID()!=sendNode.getID()) & (recorrido.size()<maxJump))
+				while((tempNode.getID()!=((double) randNode)) & (recorrido.size()<maxJump))
 				{
 					//System.out.println("Destino diferente a inicio");
 					//guardo la cantidad de vecinos que tiene un nodo.
@@ -96,14 +98,15 @@ public class Layer implements Cloneable, EDProtocol {
 					for (int i = 0; i < neighbor; i++) 
 					{
 						//Reviso si algun vecino tiene la ID que estoy buscando.
-						if(tempNode.getID()==((Linkable) tempNode.getProtocol(0)).getNeighbor(i).getID())
+						if(((double) randNode)==((Linkable) tempNode.getProtocol(0)).getNeighbor(i).getID())
+							//if(tempNode.getID()==((Linkable) tempNode.getProtocol(0)).getNeighbor(i).getID())	
 						{
-							tempNode=(ExampleNode) sendNode;
+							tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(i);
 							break;
 						}
 					}
 					
-					if(tempNode.getID()==sendNode.getID())
+					if(tempNode.getID()==((double) randNode))
 					{
 						//actualizo cache
 						System.out.println("EUREKA!!!!!!!!");
@@ -161,11 +164,12 @@ public class Layer implements Cloneable, EDProtocol {
 				
 			}
 			*/
-			sendmessage(myNode,sendNode, layerId, message);
+			sendmessage(myNode,tempNode, layerId, message);
 		}
 		else
 		{
-			sendmessage(myNode,sendNode, layerId, message);
+			//sendmessage(myNode,tempNode, layerId, message);
+			System.out.println("El nodo destino tiene que ser diferente al nodo origen.");
 		}
 		getStats();
 	}
