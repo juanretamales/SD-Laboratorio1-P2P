@@ -33,8 +33,9 @@ public class Layer implements Cloneable, EDProtocol {
 	 */
 	@Override
 	public void processEvent(Node myNode, int layerId, Object event) {
+		boolean debug=true;
 		Message message = (Message) event;
-		System.out.println("Nodo actual:"+myNode.getID());
+		debugeando("Nodo actual:"+myNode.getID(), debug);
 		/**
 		 * Random degree - busca un numero aleatorio entre la cantidad de nodos en la red.
 		 */
@@ -43,7 +44,7 @@ public class Layer implements Cloneable, EDProtocol {
 		{
 			randNode = CommonState.r.nextInt(Network.size());
 		}
-		System.out.println("Nodo a recibir el mensaje:"+randNode);
+		debugeando("Nodo a recibir el mensaje:"+randNode, debug);
 		//guardo en la variable recorrido para despues verificar que no pasemos por el mismo nodo. INT idNodo recorrido, INT idNODO a buscar
 		ArrayList<Integer> recorrido = new ArrayList<Integer>();
 		//cache.put((int) this.tempNodo.getID(), CommonState.r.nextInt((int)((Linkable) this.tempNodo.getProtocol(0)).degree()));
@@ -74,8 +75,7 @@ public class Layer implements Cloneable, EDProtocol {
 					tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(cache.get(randNode, true)); //asignando a tempNote el vecino encontrado
 					if(tempNode.getID()==((double) randNode))
 					{
-						System.out.println("EUREKA!!!!!!!!");
-						break;
+						debugeando("EUREKA!!!!!!!!", debug);
 					}
 					else
 					{
@@ -85,8 +85,7 @@ public class Layer implements Cloneable, EDProtocol {
 						}
 						else
 						{
-							System.out.println("Alcansando numero maximo de saltos.");
-							break;
+							debugeando("Alcansando numero maximo de saltos.", debug);
 						}
 					}
 				}
@@ -97,9 +96,9 @@ public class Layer implements Cloneable, EDProtocol {
 					{
 						if(((double) randNode)==((Linkable) tempNode.getProtocol(0)).getNeighbor(i).getID()) //De tenerla sera maravillas y termina el While
 						{
+							debugeando("	Encontrando nodo en un vecino", debug);
 							tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(i);
 							recorrido.add(((int) tempNode.getID()));//este ultimo es para cuando llegue al final sepa que tiene q ir a ese vecino y no recorrerlos
-							break;
 						}
 					}
 					if(tempNode.getID()!=((double) randNode)) //Ahora reviso si el nodo actual no es el encontrado para buscar un vecino aleatorio.
@@ -108,16 +107,16 @@ public class Layer implements Cloneable, EDProtocol {
 						while(recorrido.contains((int) tempNode.getID())==true) //Compruebo que el nodo seleccionado no este en el recorrido, de lo contrario selecciono uno nuevo
 						{
 							tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(CommonState.r.nextInt(neighbor)); //Actualizo el nodo actual de entre todos los vecinos.
-							//System.out.println("	Buscando en el vecino: "+tempNode.getID());
+							debugeando("	Buscando en el vecino: "+tempNode.getID(), debug);
 						}
+						debugeando("	Tamaño de recorrido: "+recorrido.size(), debug);
 						if((recorrido.size()+1)<=maxJump)//revisando si al recorrido le quedan saltos disponibles.
 						{
 							recorrido.add(((int) tempNode.getID())); //agregando el nuevo nodo al recorrido
 						}
 						else
 						{
-							System.out.println("Alcansando numero maximo de saltos.");
-							break;
+							debugeando("Alcansando numero maximo de saltos.", debug);
 						}
 					}
 				}
@@ -158,6 +157,14 @@ public class Layer implements Cloneable, EDProtocol {
 		getStats();
 	}
 
+	private void debugeando(String msg, boolean mostrar)
+	{
+		if(mostrar==true)
+		{
+			System.out.println(msg);
+		}
+	}
+	
 	private void getStats() {
 		Observer.message.add(1);		
 	}
