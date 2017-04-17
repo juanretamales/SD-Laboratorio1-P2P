@@ -69,7 +69,7 @@ public class Layer implements Cloneable, EDProtocol {
 				//lo encontro en cache
 				
 				LRUMap<Integer, Integer> cache=new LRUMap<Integer, Integer>(((ExampleNode) myNode).getCacheSize());
-				while((tempNode.getID()!=((double) randNode)))
+				while((tempNode.getID()!=((double) randNode))  & (recorrido.size()<maxJump))
 				{
 					cache = tempNode.getCache();
 					//verificando si se encuentra dentro del cache
@@ -79,6 +79,42 @@ public class Layer implements Cloneable, EDProtocol {
 						//int i=cache.get(((int) sendNode.getID()));
 						//asignando a tempNote el vecino encontrado
 						tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(cache.get(randNode));
+						recorrido.add(((int) tempNode.getID()));
+					}
+					else
+					{
+						//busca entre los vecinos si alguien es el nodo buscado
+						int neighbor = (int) ((Linkable) tempNode.getProtocol(0)).degree();
+						for (int i = 0; i < neighbor; i++) 
+						{
+							//Reviso si algun vecino tiene la ID que estoy buscando.
+							if(((double) randNode)==((Linkable) tempNode.getProtocol(0)).getNeighbor(i).getID())
+								//if(tempNode.getID()==((Linkable) tempNode.getProtocol(0)).getNeighbor(i).getID())	
+							{
+								tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(i);
+								break;
+							}
+						}
+						if(tempNode.getID()==((double) randNode))
+						{
+							System.out.println("EUREKA!!!!!!!!");
+							break;
+						}
+						else
+						{
+							tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(CommonState.r.nextInt(neighbor));
+							//selecciono un nuevo nodo entre los vecinos al azar para continuar, y si ya lo tomo, lo salta y toma al azar otro vecino
+							while(recorrido.contains(((int) tempNode.getID()))==true)
+							{
+								tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(CommonState.r.nextInt(neighbor));
+							}
+							recorrido.add(((int) tempNode.getID()));
+						}
+					}
+					if(recorrido.size()==maxJump)
+					{
+						System.out.println("NO SE ENCONTRO DESTINO, terminando los saltos.");
+						break;
 					}
 					//si tempNode no es el nodo que estamos buscando sigue buscando en cache.
 					//falta buscar si ya no lo tiene en cache.
