@@ -48,7 +48,14 @@ public class ExampleNode extends GeneralNode {
 	{
 		this.cache.put(idNode, idNeigbor);
 	}
-
+	public LRUMap<Integer, Integer> getCache(int idNode)
+	{
+		return this.cache;
+	}
+	public int getOneCache(int idNode)
+	{
+		return this.cache.get(idNode, true);
+	}
 	public void insertCache(int idNode, int idNeigbor)
 	{
 		if(this.cache.isFull())

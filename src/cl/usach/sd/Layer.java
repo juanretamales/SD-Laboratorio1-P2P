@@ -3,6 +3,7 @@ package cl.usach.sd;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.commons.collections4.map.LRUMap;
@@ -70,7 +71,7 @@ public class Layer implements Cloneable, EDProtocol {
 				cache = tempNode.getCache(); //buscando la ID del vecino a quien preguntar
 				if(cache.get(randNode)!=null) //Revisando si la encontro en cache.
 				{
-					tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(cache.get(randNode)); //asignando a tempNote el vecino encontrado
+					tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(cache.get(randNode, true)); //asignando a tempNote el vecino encontrado
 					if(tempNode.getID()==((double) randNode))
 					{
 						System.out.println("EUREKA!!!!!!!!");
@@ -94,15 +95,21 @@ public class Layer implements Cloneable, EDProtocol {
 					int neighbor = (int) ((Linkable) tempNode.getProtocol(0)).degree(); //Obtengo la cantidad de vecinos del nodo actual.
 					for (int i = 0; i < neighbor; i++)  //Reviso si algun vecino tiene la ID que estoy buscando.
 					{
-						if(((double) randNode)==((Linkable) tempNode.getProtocol(0)).getNeighbor(i).getID()) //De tenerla sera maravillas
+						if(((double) randNode)==((Linkable) tempNode.getProtocol(0)).getNeighbor(i).getID()) //De tenerla sera maravillas y termina el While
 						{
 							tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(i);
+							recorrido.add(((int) tempNode.getID()));//este ultimo es para cuando llegue al final sepa que tiene q ir a ese vecino y no recorrerlos
 							break;
 						}
 					}
 					if(tempNode.getID()!=((double) randNode)) //Ahora reviso si el nodo actual no es el encontrado para buscar un vecino aleatorio.
 					{
 						tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(CommonState.r.nextInt(neighbor)); //Actualizo el nodo actual de entre todos los vecinos.
+						while(recorrido.contains((int) tempNode.getID())==true) //Compruebo que el nodo seleccionado no este en el recorrido, de lo contrario selecciono uno nuevo
+						{
+							tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(CommonState.r.nextInt(neighbor)); //Actualizo el nodo actual de entre todos los vecinos.
+							//System.out.println("	Buscando en el vecino: "+tempNode.getID());
+						}
 						if((recorrido.size()+1)<=maxJump)//revisando si al recorrido le quedan saltos disponibles.
 						{
 							recorrido.add(((int) tempNode.getID())); //agregando el nuevo nodo al recorrido
@@ -118,12 +125,26 @@ public class Layer implements Cloneable, EDProtocol {
 			if(myNode.getID()==tempNode.getID())
 			{
 				System.out.println("ENCONTRO DESTINO!!!!!!!");
-				sendmessage(myNode,tempNode, layerId, message);
+				Node sendNode = (Node) tempNode;
 				// Ya le encontro, falta actualizar cache de todos los nodos recorridos.
+				tempNode=(ExampleNode) myNode;
+				for( int i = 0 ; i < recorrido.size() ; i++ )
+				{
+					  tempNode.getCache().put(randNode, recorrido.get(i));//Agrego el cache al nodo.
+					  tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(recorrido.get(i));//me cambio al nodo vecino para actualizar su cache.
+				}
+				
+				
+				sendmessage(myNode,sendNode, layerId, message);
+				
 			}
 			else
 			{
-				System.out.println("NO SE ENCONTRO DESTINO.");
+				System.out.println("NO SE ENCONTRO DESTINO. Recorrido:");
+				for( int i = 0 ; i < recorrido.size() ; i++ )
+				{
+					System.out.println("	"+recorrido.get(i));
+				}
 				//Como no encontro el nodo en los saltos, igual realiza el envio del mensaje PERO la busca directamente en TODA la red.
 				Node sendNode = searchNode(randNode);
 				sendmessage(myNode,sendNode, layerId, message);
