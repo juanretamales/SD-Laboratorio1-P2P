@@ -71,11 +71,22 @@ public class Layer implements Cloneable, EDProtocol {
 			{
 				
 				cache = tempNode.getCache(); //buscando la ID del vecino a quien preguntar
-				debugeando("	cache.get(randNode): "+cache.get(randNode), debug);
+				//debugeando("	cache.get(randNode): "+cache.get(randNode), debug);
 				//if(cache.get(randNode)!=null && cache.containsKey(randNode)) //Revisando si la encontro en cache.
 				if(cache.containsKey(randNode)) //Revisando si la encontro en cache.
 				{
-					tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(cache.get(randNode, true)); //asignando a tempNote el vecino encontrado
+					debugeando("	cache.get(randNode, true): "+cache.get(randNode, true), debug);
+					
+					//tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(cache.get(randNode, true)); //asignando a tempNote el vecino encontrado
+					int vecinos = (int) ((Linkable) tempNode.getProtocol(0)).degree(); //Obtengo la cantidad de vecinos del nodo actual.
+					for (int j = 0; j < vecinos; j++)
+					{
+						if(((Linkable) tempNode.getProtocol(0)).getNeighbor(j).getID() == ((double) cache.get(randNode, true)))
+						{
+							tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(j);
+							break;
+						}
+					}
 					if(tempNode.getID()==((double) randNode))
 					{
 						debugeando("EUREKA!!!!!!!!", debug);
@@ -111,10 +122,13 @@ public class Layer implements Cloneable, EDProtocol {
 					if(tempNode.getID()!=((double) randNode)) //Ahora reviso si el nodo actual no es el encontrado para buscar un vecino aleatorio.
 					{
 						tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(CommonState.r.nextInt(neighbor)); //Actualizo el nodo actual de entre todos los vecinos.
-						while(recorrido.contains((int) tempNode.getID())==true) //Compruebo que el nodo seleccionado no este en el recorrido, de lo contrario selecciono uno nuevo
-						//while(recorrido.containsKey((int) tempNode.getID()))
+						while(recorrido.contains((int) tempNode.getID())) //Compruebo que el nodo seleccionado no este en el recorrido, de lo contrario selecciono uno nuevo
 						{
-							tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(CommonState.r.nextInt(neighbor)); //Actualizo el nodo actual de entre todos los vecinos.
+							int rand = CommonState.r.nextInt(neighbor);
+							if(((Linkable) tempNode.getProtocol(0)).getNeighbor(rand)!=null)
+							{
+								tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(rand); //Actualizo el nodo actual de entre todos los vecinos.
+							}
 						}
 						if((recorrido.size()+1)<=maxJump)//revisando si al recorrido le quedan saltos disponibles.
 						{
