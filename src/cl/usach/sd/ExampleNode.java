@@ -11,6 +11,7 @@ public class ExampleNode extends GeneralNode {
 	 * el segundo es en cual vecino encontro la solucion.
 	 */
 	private LRUMap<Integer, Integer> cache;
+	private LRUMap<Integer, ExampleNode> cacheNode;
 	private int cacheSize;
 	//para prueba
 	//private list<String> datos;
@@ -20,12 +21,14 @@ public class ExampleNode extends GeneralNode {
 		this.setCount(0);
 		this.cacheSize=100;
 		this.cache=new LRUMap<Integer, Integer> (this.cacheSize);
+		this.cacheNode=new LRUMap<Integer, ExampleNode> (this.cacheSize);
 	}
 	public ExampleNode(String prefix, Integer cacheSize) {
 		super(prefix);
 		this.setCount(0);
 		this.cacheSize=cacheSize;
 		this.cache=new LRUMap<Integer, Integer> (this.cacheSize);
+		this.cacheNode=new LRUMap<Integer, ExampleNode> (this.cacheSize);
 	}
 
 	public int getCount() {
@@ -74,6 +77,20 @@ public class ExampleNode extends GeneralNode {
 
 	public void setCacheSize(int cacheSize) {
 		this.cacheSize = cacheSize;
+	}
+	public LRUMap<Integer, ExampleNode> getCacheNode() {
+		return cacheNode;
+	}
+	public void setCacheNode(LRUMap<Integer, ExampleNode> cacheNode) {
+		this.cacheNode = cacheNode;
+	}
+	public ExampleNode getCacheNode(double idNode)
+	{
+		if(this.cacheNode.containsKey(idNode))
+		{
+			return this.cacheNode.get(idNode, true);
+		}
+		return null;
 	}
 	
 }

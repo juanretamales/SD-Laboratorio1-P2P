@@ -26,7 +26,7 @@ public class TrafficGenerator implements Control {
 
 		// Se crea un nuevo mensaje
 		//el primer int es el contenido numerico 0-1000000, el segundo es el tipo numerico 0-4
-		Message message = new Message(CommonState.r.nextInt(1000000), CommonState.r.nextInt(4));
+		Message message = new Message(String.valueOf(CommonState.r.nextInt(1000000)), CommonState.r.nextInt(4));
 
 		// Y se envía, para realizar la simulación
 		// Los parámetros corresponde a:

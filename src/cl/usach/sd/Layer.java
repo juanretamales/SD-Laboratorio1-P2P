@@ -33,7 +33,11 @@ public class Layer implements Cloneable, EDProtocol {
 	 */
 	@Override
 	public void processEvent(Node myNode, int layerId, Object event) {
-		boolean debug=false;//poner a true si quieres que muestre los mensajes comunes en la consola
+		
+		boolean debug=true;//poner a true si quieres que muestre los mensajes comunes en la consola
+		
+		boolean cacheNode=true;//poner false si quieres usar el cache que use solo la id y no el cache que guarda el nodo.
+		
 		Message message = (Message) event;
 		debugeando("Nodo actual:"+myNode.getID(), debug);
 		/**
@@ -72,9 +76,23 @@ public class Layer implements Cloneable, EDProtocol {
 			LRUMap<Integer, Integer> cache=new LRUMap<Integer, Integer>(((ExampleNode) myNode).getCacheSize());
 			while((tempNode.getID()!=((double) randNode))  & (recorrido.size()<maxJump))
 			{
-				
+				if(cacheNode==true)
+				{
+					
+					//Aqui se realiza el recorrido por cache
+					if(((ExampleNode) myNode).getCacheNode(randNode)!=null)
+					{
+						tempNode=((ExampleNode) myNode).getCacheNode(randNode);
+						debugeando("EUREKA!!!!!!!!", debug);
+						sendmessage(myNode,tempNode, layerId, message);
+						Message msg = new Message((String) "Mensaje enviado con exito");
+						sendmessage(tempNode,myNode, layerId, msg);
+						break;
+					}
+				}
+				//Aqui se realiza el recorrido por salto
 				cache = tempNode.getCache(); //buscando la ID del vecino a quien preguntar
-				if(cache.containsKey(randNode)) //Revisando si la encontro en cache.
+				if(cache.containsKey(randNode)==true && cacheNode==false) //Revisando si la encontro en cache.
 				{
 					debugeando("	cache.get(randNode, true): "+cache.get(randNode, true), debug);
 					int vecinos = (int) ((Linkable) tempNode.getProtocol(0)).degree(); //Obtengo la cantidad de vecinos del nodo actual.
@@ -142,28 +160,48 @@ public class Layer implements Cloneable, EDProtocol {
 			if((double) randNode==tempNode.getID())
 			{
 				debugeando("ENCONTRO DESTINO!!!!!!!", debug);
-				//Como el nodo fue encontrado empezamos a asignar el cache a cada nodo.
-				tempNode=(ExampleNode) myNode;
-				for( int i = 0 ; i < recorrido.size() ; i++ )
+				if(cacheNode==true)
 				{
-					Map<Integer, Integer> tempMap = tempNode.getCache();
-					tempMap.put(randNode, recorrido.get(i));
-					tempNode.setCache((LRUMap<Integer, Integer>) tempMap);
-					int vecinos = (int) ((Linkable) tempNode.getProtocol(0)).degree(); //Obtengo la cantidad de vecinos del nodo actual.
-					for (int j = 0; j < vecinos; j++)
+
+					Map<Integer, ExampleNode> tempMapCache = tempNode.getCacheNode();
+
+					tempMapCache.put(randNode, tempNode);
+					tempNode.setCacheNode((LRUMap<Integer, ExampleNode>) tempMapCache);
+
+					debugeando("	MENSAJE ENVIADO!", debug);
+					sendmessage(myNode,tempNode, layerId, message);
+					Message msg = new Message((String) "Mensaje enviado con exito");
+					sendmessage(tempNode,myNode, layerId, msg);
+				}
+				else
+				{
+					//Como el nodo fue encontrado empezamos a asignar el cache a cada nodo.
+					tempNode=(ExampleNode) myNode;
+					for( int i = 0 ; i < recorrido.size() ; i++ )
 					{
-						int a = (int) ((Linkable) tempNode.getProtocol(0)).getNeighbor(j).getID();
-						int b = recorrido.get(i);
-						if(b == a)
+						Map<Integer, Integer> tempMap = tempNode.getCache();
+						tempMap.put(randNode, recorrido.get(i));
+						tempNode.setCache((LRUMap<Integer, Integer>) tempMap);
+						int vecinos = (int) ((Linkable) tempNode.getProtocol(0)).degree(); //Obtengo la cantidad de vecinos del nodo actual.
+						for (int j = 0; j < vecinos; j++)
 						{
-							tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(j);
-							break;
+							int a = (int) ((Linkable) tempNode.getProtocol(0)).getNeighbor(j).getID();
+							int b = recorrido.get(i);
+							if(b == a)
+							{
+								tempNode=(ExampleNode) ((Linkable) tempNode.getProtocol(0)).getNeighbor(j);
+								break;
+							}
 						}
 					}
+
+					
+					debugeando("	MENSAJE ENVIADO!", debug);
+					sendmessage(myNode,tempNode, layerId, message);
+					Message msg = new Message((String) "Mensaje enviado con exito");
+					sendmessage(tempNode,myNode, layerId, msg);
+					
 				}
-				
-				debugeando("	MENSAJE ENVIADO!", debug);
-				sendmessage(myNode,tempNode, layerId, message);
 				
 			}
 			else
