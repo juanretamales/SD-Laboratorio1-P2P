@@ -84,9 +84,6 @@ public class Layer implements Cloneable, EDProtocol {
 					{
 						tempNode=((ExampleNode) myNode).getCacheNode(randNode);
 						debugeando("EUREKA!!!!!!!!", debug);
-						sendmessage(myNode,tempNode, layerId, message);
-						Message msg = new Message((String) "Mensaje enviado con exito");
-						sendmessage(tempNode,myNode, layerId, msg);
 						break;
 					}
 				}
